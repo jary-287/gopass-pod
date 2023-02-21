@@ -18,10 +18,10 @@ import (
 
 type IPodService interface {
 	AddPod(*model.Pod) (int64, error)
-	DeletePod(int64) error
+	DeletePod(uint64) error
 	UpdatePod(*model.Pod) error
 	FindPodById(int64) (*model.Pod, error)
-	FindAllPod() ([]*model.Pod, error)
+	FindAllPod() ([]model.Pod, error)
 	CreateToK8s(*pod.PodInfo) error
 	DeleteFromK8s(*pod.PodInfo) error
 	UpdateToK8s(*pod.PodInfo) error
@@ -51,6 +51,7 @@ func (ps *PodService) CreateToK8s(pod *pod.PodInfo) error {
 	ps.SetDeployment(pod)
 	if _, err := ps.K8sClient.AppsV1().Deployments(pod.PodNamespace).Get(context.TODO(),
 		pod.PodName, metav1.GetOptions{}); err != nil {
+		ps.SetDeployment(pod)
 		if _, err = ps.K8sClient.AppsV1().Deployments(pod.PodNamespace).Create(
 			context.TODO(), ps.Deployment, metav1.CreateOptions{}); err != nil {
 			return err
@@ -86,12 +87,12 @@ func (ps *PodService) DeleteFromK8s(pod *pod.PodInfo) error {
 }
 
 // DeletePod implements IPodService
-func (ps *PodService) DeletePod(podID int64) error {
+func (ps *PodService) DeletePod(podID uint64) error {
 	return ps.PodRegistry.DeletePod(podID)
 }
 
 // FindAllPod implements IPodService
-func (ps *PodService) FindAllPod() ([]*model.Pod, error) {
+func (ps *PodService) FindAllPod() ([]model.Pod, error) {
 	return ps.PodRegistry.Get()
 }
 
@@ -112,6 +113,7 @@ func (ps *PodService) UpdateToK8s(info *pod.PodInfo) error {
 	); err != nil {
 		return errors.New(fmt.Sprintf("pod 不存在，请先创建,pod name:%s", info.PodName))
 	} else {
+		ps.SetDeployment(info)
 		if _, err = ps.K8sClient.AppsV1().Deployments(info.PodNamespace).Update(
 			context.TODO(),
 			ps.Deployment,
@@ -128,12 +130,12 @@ func (ps *PodService) GetPodEnv() {
 
 }
 func (ps *PodService) SetDeployment(info *pod.PodInfo) {
-	deployment := &v1.Deployment{}
-	deployment.TypeMeta = metav1.TypeMeta{
+	//ps.Deployment := &v1.Deployment{}
+	ps.Deployment.TypeMeta = metav1.TypeMeta{
 		Kind:       "deployment",
 		APIVersion: "v1",
 	}
-	deployment.ObjectMeta = metav1.ObjectMeta{
+	ps.Deployment.ObjectMeta = metav1.ObjectMeta{
 		Name:      info.PodName,
 		Namespace: info.PodNamespace,
 		Labels: map[string]string{
@@ -141,8 +143,8 @@ func (ps *PodService) SetDeployment(info *pod.PodInfo) {
 			"author": "ljw",
 		},
 	}
-	deployment.Name = info.PodName
-	deployment.Spec = v1.DeploymentSpec{
+	ps.Deployment.Name = info.PodName
+	ps.Deployment.Spec = v1.DeploymentSpec{
 		Replicas: &info.Replicas,
 		Selector: &metav1.LabelSelector{
 			MatchLabels: map[string]string{

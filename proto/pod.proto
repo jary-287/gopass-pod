@@ -13,7 +13,7 @@ service Pod {
 }
 
 message PodInfo {
-    int64 pod_id = 1;
+    uint64 pod_id = 1;
     string pod_name = 2;
     string pod_namespace =3;
     int64 pod_team_id =4;

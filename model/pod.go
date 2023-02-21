@@ -5,7 +5,7 @@ import (
 )
 
 type PodPort struct {
-	ID       int64  `gorm:"primary_key,not null,AUTO_INCREMENT" json:"id"`
+	ID       uint   `gorm:"primary_key,not null,AUTO_INCREMENT" json:"id"`
 	PodID    string `json:"pod_id"`
 	Port     int32  `json:"port"`
 	Protocol string `json:"protocol"`
@@ -19,8 +19,8 @@ type PodEnv struct {
 }
 
 type Pod struct {
-	PodID            int64     `gorm:"primary_key,AUTO_INCREMENT" json:"pod_id"`
-	PodName          string    `gorm:"unique,not null" json:"pod_name"`
+	PodID            int64     `gorm:"primaryKey;AUTO_INCREMENT" json:"pod_id"`
+	PodName          string    `gorm:"unique;not null" json:"pod_name"`
 	PodNameSpace     string    `json:"pod_namespace"`
 	PodTeamID        int64     `json:"pod_team_id"`
 	PodMaxCpuUsage   float64   `json:"pod_max_cpu_usage"`
@@ -44,11 +44,11 @@ type IPod interface {
 	//创建一个Pod
 	CreatePod(*Pod) (int64, error)
 	//删除pod
-	DeletePod(int64) error
+	DeletePod(uint64) error
 	//更新Pod
 	UpdatePod(*Pod) error
 	//查找所有
-	Get() ([]*Pod, error)
+	Get() ([]Pod, error)
 }
 
 func NewPodRegistry(db *gorm.DB) *PodRegistry {
@@ -78,15 +78,15 @@ func (p *PodRegistry) CreatePod(pod *Pod) (podId int64, err error) {
 	return
 }
 
-func (p *PodRegistry) DeletePod(id int64) error {
-	return p.db.Delete(&Pod{}, id).Error
+func (p *PodRegistry) DeletePod(id uint64) error {
+	return p.db.Where("pod_id=?", id).Delete(&Pod{}).Error
 }
 
 func (p *PodRegistry) UpdatePod(pod *Pod) error {
 	return p.db.Model(&Pod{}).Update(pod).Error
 }
 
-func (p *PodRegistry) Get() (pods []*Pod, err error) {
-	err = p.db.Preloads("PodEnv").Preloads("PodPort").Find(pods).Error
+func (p *PodRegistry) Get() (pods []Pod, err error) {
+	err = p.db.Preloads("PodEnv").Preloads("PodPort").Find(&pods).Error
 	return pods, err
 }

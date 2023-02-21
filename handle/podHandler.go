@@ -3,6 +3,7 @@ package handle
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 
 	"github.com/jary-287/gopass-pod/model"
@@ -17,7 +18,7 @@ type Podhandler struct {
 func (ph *Podhandler) AddPod(ctx context.Context, info *pod.PodInfo, rsp *pod.Response) error {
 	log.Println("add pod :", info.PodName)
 	podModel := &model.Pod{}
-	if err := swap(podModel, info); err != nil {
+	if err := swap(info, podModel); err != nil {
 		rsp.Msg = err.Error()
 		return err
 	}
@@ -39,6 +40,7 @@ func (ph *Podhandler) DeletePod(ctx context.Context, info *pod.PodInfo, rsp *pod
 		rsp.Msg = err.Error()
 		return err
 	}
+	log.Println("delete pod from k8s success:  podname", info.PodName)
 	if err := ph.PodService.DeletePod(info.PodId); err != nil {
 		rsp.Msg = err.Error()
 		return err
@@ -76,10 +78,10 @@ func (ph *Podhandler) FindPodById(ctx context.Context, id *pod.PodId, info *pod.
 func (ph *Podhandler) FindAllPod(ctx context.Context, findAll *pod.FinadAll, allPod *pod.AllPod) error {
 	pods, err := ph.PodService.FindAllPod()
 	if err != nil {
-		return err
+		return errors.New("find all pod failed:" + err.Error())
 	}
-	if err := swap(pods, allPod.PodInfo); err != nil {
-		return err
+	if err := swap(pods, &allPod.PodInfo); err != nil {
+		return errors.New("find all pod: swap failed " + err.Error())
 	}
 	log.Println("find all pod success")
 	return nil
@@ -87,10 +89,13 @@ func (ph *Podhandler) FindAllPod(ctx context.Context, findAll *pod.FinadAll, all
 
 //proroto打包成json，在解到struct
 func swap(source interface{}, target interface{}) error {
+
 	data, err := json.Marshal(source)
+	log.Println("debug:package", data)
 	if err != nil {
 		return err
 	}
 	err = json.Unmarshal(data, target)
+	log.Println("debug:unpackage", target)
 	return err
 }

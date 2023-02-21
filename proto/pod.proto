@@ -29,13 +29,13 @@ message PodInfo {
 }
 
 message PodEnv{
-    int64 pod_id=1;
+    uint64 id=1;
     string env_key=2;
     string env_value=3;
 }
 
 message PodPort{
-    int64 pod_id =1;
+    uint64 id =1;
     int32 port = 2;
     string protocol =3;
 }

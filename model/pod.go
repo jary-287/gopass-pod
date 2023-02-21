@@ -5,15 +5,13 @@ import (
 )
 
 type PodPort struct {
-	ID       uint   `gorm:"primary_key,not null,AUTO_INCREMENT" json:"id"`
-	PodID    string `json:"pod_id"`
+	ID       uint   `gorm:"primaryKey;not null;AUTO_INCREMENT" json:"id"`
 	Port     int32  `json:"port"`
 	Protocol string `json:"protocol"`
 }
 
 type PodEnv struct {
-	ID       int64  `gorm:"primary_key,not null,AUTO_INCREMENT" json:"id"`
-	PodID    string `json:"pod_id"`
+	ID       int64  `gorm:"primaryKey;not null;AUTO_INCREMENT" json:"id"`
 	EnvKey   string `json:"env_key"`
 	EnvValue string `json:"env_value"`
 }
@@ -27,8 +25,8 @@ type Pod struct {
 	PodMinCpuUsage   float64   `json:"pod_min_cpu_usage"`
 	PodMaxMemUsage   float64   `json:"pod_max_mem_usage"`
 	PodMinMemUsage   float64   `json:"pod_min_mem_usage"`
-	PodPorts         []PodPort `gorm:"foreignKey:PodID" json:"pod_ports"`
-	PodEnvs          []PodEnv  `gorm:"foreignKey:PodID" json:"pod_envs"`
+	PodPorts         []PodPort `gorm:"foreignKey:ID" json:"pod_ports"`
+	PodEnvs          []PodEnv  `gorm:"foreignKey:ID" json:"pod_envs"`
 	Image            string    `gorm:"not null" json:"image"`
 	PodPullPolicy    string    `gorm:"default:'if_not_present'" json:"pod_pull_policy"`
 	PodRestartPolicy string    `gorm:"default:'always'" json:"pod_restart_policy"`

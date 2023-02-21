@@ -17,10 +17,10 @@ import (
 )
 
 type IPodService interface {
-	AddPod(*model.Pod) (int64, error)
+	AddPod(*model.Pod) (uint64, error)
 	DeletePod(uint64) error
 	UpdatePod(*model.Pod) error
-	FindPodById(int64) (*model.Pod, error)
+	FindPodById(uint64) (*model.Pod, error)
 	FindAllPod() ([]model.Pod, error)
 	CreateToK8s(*pod.PodInfo) error
 	DeleteFromK8s(*pod.PodInfo) error
@@ -42,7 +42,7 @@ func NewPodService(podRegistry model.IPod, client *kubernetes.Clientset) IPodSer
 }
 
 // AddPod implements IPodService
-func (ps *PodService) AddPod(pod *model.Pod) (int64, error) {
+func (ps *PodService) AddPod(pod *model.Pod) (uint64, error) {
 	return ps.PodRegistry.CreatePod(pod)
 }
 
@@ -97,7 +97,7 @@ func (ps *PodService) FindAllPod() ([]model.Pod, error) {
 }
 
 // FindPodById implements IPodService
-func (ps *PodService) FindPodById(podID int64) (*model.Pod, error) {
+func (ps *PodService) FindPodById(podID uint64) (*model.Pod, error) {
 	return ps.PodRegistry.GetById(podID)
 }
 

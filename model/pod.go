@@ -11,13 +11,13 @@ type PodPort struct {
 }
 
 type PodEnv struct {
-	ID       int64  `gorm:"primaryKey;not null;AUTO_INCREMENT" json:"id"`
+	ID       uint64 `gorm:"primaryKey;not null;AUTO_INCREMENT" json:"id"`
 	EnvKey   string `json:"env_key"`
 	EnvValue string `json:"env_value"`
 }
 
 type Pod struct {
-	PodID            int64     `gorm:"primaryKey;AUTO_INCREMENT" json:"pod_id"`
+	PodID            uint64    `gorm:"primaryKey;type:autoIncrement not null" json:"pod_id"`
 	PodName          string    `gorm:"unique;not null" json:"pod_name"`
 	PodNameSpace     string    `json:"pod_namespace"`
 	PodTeamID        int64     `json:"pod_team_id"`
@@ -38,9 +38,9 @@ type IPod interface {
 	//初始化表
 	InitTable() error
 	//根据ID查找数据
-	GetById(int64) (*Pod, error)
+	GetById(uint64) (*Pod, error)
 	//创建一个Pod
-	CreatePod(*Pod) (int64, error)
+	CreatePod(*Pod) (uint64, error)
 	//删除pod
 	DeletePod(uint64) error
 	//更新Pod
@@ -64,13 +64,13 @@ func (p *PodRegistry) InitTable() error {
 
 }
 
-func (p *PodRegistry) GetById(id int64) (pod *Pod, err error) {
+func (p *PodRegistry) GetById(id uint64) (pod *Pod, err error) {
 	pod = &Pod{}
 	err = p.db.Preloads("PodEnv").Preloads("PodPort").First(pod, id).Error
 	return
 }
 
-func (p *PodRegistry) CreatePod(pod *Pod) (podId int64, err error) {
+func (p *PodRegistry) CreatePod(pod *Pod) (podId uint64, err error) {
 	podId = pod.PodID
 	err = p.db.Create(pod).Error
 	return

@@ -65,7 +65,6 @@ type PodRegistry struct {
 
 func (p *PodRegistry) InitTable() error {
 	log.Println("自动迁移数据库")
-	p.db.AutoMigrate(&Pod{})
 	return p.db.AutoMigrate(&Pod{}, &PodEnv{}, &PodPort{})
 
 }
@@ -83,13 +82,29 @@ func (p *PodRegistry) CreatePod(pod *Pod) (podId uint64, err error) {
 }
 
 func (p *PodRegistry) DeletePod(id uint64) error {
-	return p.db.Where("pod_id=?", id).Delete(&Pod{}).Error
+	tx := p.db.Begin()
+	tx.Where("pod_id = ?", id).Delete(&PodPort{})
+	tx.Where("pod_id = ?", id).Delete(&PodEnv{})
+	tx.Where("pod_id=?", id).Delete(&Pod{})
+	if err := tx.Commit().Error; err != nil {
+		tx.Callback()
+		return err
+	}
+	return nil
 }
 
 func (p *PodRegistry) UpdatePod(pod *Pod) error {
-	return p.db.Save(pod).Error
-
+	tx := p.db.Begin()
+	tx.Association("pod_envs").DB.Save(pod.PodEnvs)
+	tx.Association("pod_ports").DB.Save(pod.PodPorts)
+	tx.Save(pod)
+	if err := tx.Commit().Error; err != nil {
+		tx.Callback()
+		return err
+	}
+	return nil
 }
+
 func (p *PodRegistry) Get() (pods []Pod, err error) {
 	err = p.db.Preload("PodEnvs").Preload("PodPorts").Find(&pods).Error
 	return pods, err

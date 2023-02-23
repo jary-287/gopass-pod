@@ -32,6 +32,7 @@ func GetDB() error {
 			SingularTable: true, //禁止复表
 		},
 	})
+
 	if err != nil {
 		return err
 	}

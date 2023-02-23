@@ -68,7 +68,7 @@ func (ps *PodService) DeleteFromK8s(pod *pod.PodInfo) error {
 	if _, err := ps.K8sClient.AppsV1().Deployments(pod.PodNamespace).Get(
 		context.TODO(), pod.PodName, metav1.GetOptions{},
 	); err != nil {
-		return errors.New(fmt.Sprintf("pod 不存在，请先创建,pod name:%s", pod.PodName))
+		return fmt.Errorf("pod 不存在，请先创建,pod name:%s", pod.PodName)
 	} else {
 		if err = ps.K8sClient.AppsV1().Deployments(pod.PodNamespace).Delete(
 			context.TODO(),
@@ -76,10 +76,6 @@ func (ps *PodService) DeleteFromK8s(pod *pod.PodInfo) error {
 			metav1.DeleteOptions{},
 		); err != nil {
 			return err
-		} else {
-			if err := ps.PodRegistry.DeletePod(pod.PodId); err != nil {
-				return err
-			}
 		}
 	}
 	log.Println("pod 删除成功，", pod.PodName)
@@ -126,9 +122,6 @@ func (ps *PodService) UpdateToK8s(info *pod.PodInfo) error {
 	return nil
 }
 
-func (ps *PodService) GetPodEnv() {
-
-}
 func (ps *PodService) SetDeployment(info *pod.PodInfo) {
 	//ps.Deployment := &v1.Deployment{}
 	ps.Deployment.TypeMeta = metav1.TypeMeta{
@@ -203,7 +196,7 @@ func (ps *PodService) GetEnvs(envs []*pod.PodEnv) (containerEnvs []v12.EnvVar) {
 	for _, env := range envs {
 		containerEnvs = append(containerEnvs, v12.EnvVar{
 			Name:  env.EnvKey,
-			Value: env.EnvValue,
+			Value: string(env.EnvValue),
 		})
 	}
 	return

@@ -59,7 +59,7 @@ func main() {
 		o.Timeout = 20 * time.Second
 
 	})
-	t, io, err := common.NewTracer("service.pod", "192.168.0.102:9333")
+	t, io, err := common.NewTracer("service.pod", ":9333")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,6 +70,7 @@ func main() {
 		micro.Name("service.pod"),
 		micro.Version("latest"),
 		//注册中心
+		micro.Address(":8888"),
 		micro.Registry(consulRegister),
 		//链路追踪
 		micro.WrapHandler(opentracing2.NewHandlerWrapper(t)),

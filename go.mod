@@ -7,8 +7,10 @@ require (
 	github.com/go-micro/plugins/v3/wrapper/breaker/hystrix v1.1.0
 	github.com/go-micro/plugins/v3/wrapper/ratelimiter/uber v1.1.0
 	github.com/go-micro/plugins/v3/wrapper/trace/opentracing v1.1.0
-	github.com/go-sql-driver/mysql v1.5.0
+	github.com/go-sql-driver/mysql v1.7.0
 	github.com/jinzhu/gorm v1.9.16
+	gorm.io/driver/mysql v1.4.7
+	gorm.io/gorm v1.24.5
 )
 
 require (

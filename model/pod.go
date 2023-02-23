@@ -1,23 +1,27 @@
 package model
 
 import (
-	"github.com/jinzhu/gorm"
+	"log"
+
+	"gorm.io/gorm"
 )
 
 type PodPort struct {
-	ID       uint   `gorm:"primaryKey;not null;AUTO_INCREMENT" json:"id"`
+	ID       uint `gorm:"primaryKey;not null;AUTO_INCREMENT" json:"omitempty"`
+	PodID    uint64
 	Port     int32  `json:"port"`
 	Protocol string `json:"protocol"`
 }
 
 type PodEnv struct {
-	ID       uint64 `gorm:"primaryKey;not null;AUTO_INCREMENT" json:"id"`
+	ID       uint64 `gorm:"primaryKey;not null;AUTO_INCREMENT" json:"id,omitempty"`
+	PodID    uint64
 	EnvKey   string `json:"env_key"`
 	EnvValue string `json:"env_value"`
 }
 
 type Pod struct {
-	PodID            uint64    `gorm:"primaryKey;type:autoIncrement not null" json:"pod_id"`
+	PodID            uint64    `gorm:"primaryKey;not null" json:"pod_id"`
 	PodName          string    `gorm:"unique;not null" json:"pod_name"`
 	PodNameSpace     string    `json:"pod_namespace"`
 	PodTeamID        int64     `json:"pod_team_id"`
@@ -25,8 +29,8 @@ type Pod struct {
 	PodMinCpuUsage   float64   `json:"pod_min_cpu_usage"`
 	PodMaxMemUsage   float64   `json:"pod_max_mem_usage"`
 	PodMinMemUsage   float64   `json:"pod_min_mem_usage"`
-	PodPorts         []PodPort `gorm:"foreignKey:ID" json:"pod_ports"`
-	PodEnvs          []PodEnv  `gorm:"foreignKey:ID" json:"pod_envs"`
+	PodPorts         []PodPort `gorm:"foreignKey:pod_id;references:pod_id" json:"pod_ports"`
+	PodEnvs          []PodEnv  `gorm:"foreignKey:pod_id;references:pod_id" json:"pod_envs"`
 	Image            string    `gorm:"not null" json:"image"`
 	PodPullPolicy    string    `gorm:"default:'if_not_present'" json:"pod_pull_policy"`
 	PodRestartPolicy string    `gorm:"default:'always'" json:"pod_restart_policy"`
@@ -60,13 +64,15 @@ type PodRegistry struct {
 }
 
 func (p *PodRegistry) InitTable() error {
-	return p.db.AutoMigrate(&Pod{}, &PodEnv{}, &PodPort{}).Error
+	log.Println("自动迁移数据库")
+	p.db.AutoMigrate(&Pod{})
+	return p.db.AutoMigrate(&Pod{}, &PodEnv{}, &PodPort{})
 
 }
 
 func (p *PodRegistry) GetById(id uint64) (pod *Pod, err error) {
 	pod = &Pod{}
-	err = p.db.Preloads("PodEnv").Preloads("PodPort").First(pod, id).Error
+	err = p.db.Preload("PodEnvs").Preload("PodPorts").First(pod, id).Error
 	return
 }
 
@@ -81,10 +87,10 @@ func (p *PodRegistry) DeletePod(id uint64) error {
 }
 
 func (p *PodRegistry) UpdatePod(pod *Pod) error {
-	return p.db.Model(&Pod{}).Update(pod).Error
-}
+	return p.db.Save(pod).Error
 
+}
 func (p *PodRegistry) Get() (pods []Pod, err error) {
-	err = p.db.Preloads("PodEnv").Preloads("PodPort").Find(&pods).Error
+	err = p.db.Preload("PodEnvs").Preload("PodPorts").Find(&pods).Error
 	return pods, err
 }

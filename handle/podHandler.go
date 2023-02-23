@@ -51,14 +51,21 @@ func (ph *Podhandler) DeletePod(ctx context.Context, info *pod.PodInfo, rsp *pod
 }
 
 func (ph *Podhandler) UpdatePod(ctx context.Context, info *pod.PodInfo, rsp *pod.Response) error {
-	if err := ph.PodService.DeletePod(info.PodId); err != nil {
+	if err := ph.PodService.UpdateToK8s(info); err != nil {
 		rsp.Msg = err.Error()
 		return err
 	}
-	if err := ph.PodService.DeleteFromK8s(info); err != nil {
+	log.Println("update pod to k8s success:", info.PodName)
+	podModel := &model.Pod{}
+	if err := swap(info, podModel); err != nil {
 		rsp.Msg = err.Error()
 		return err
 	}
+	if err := ph.PodService.UpdatePod(podModel); err != nil {
+		rsp.Msg = err.Error()
+		return err
+	}
+	log.Println("update pod  success:", info.PodName)
 	return nil
 }
 
@@ -89,13 +96,10 @@ func (ph *Podhandler) FindAllPod(ctx context.Context, findAll *pod.FinadAll, all
 
 //proroto打包成json，在解到struct
 func swap(source interface{}, target interface{}) error {
-
 	data, err := json.Marshal(source)
-	log.Println("debug:package", data)
 	if err != nil {
 		return err
 	}
 	err = json.Unmarshal(data, target)
-	log.Println("debug:unpackage", target)
 	return err
 }

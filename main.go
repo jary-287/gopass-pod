@@ -56,7 +56,8 @@ func main() {
 	//注册中心
 	consulRegister := consul.NewRegistry(func(o *registry.Options) {
 		o.Addrs = []string{"192.168.0.19:8500"}
-		o.Timeout = 10 * time.Second
+		o.Timeout = 20 * time.Second
+
 	})
 	t, io, err := common.NewTracer("service.pod", "192.168.0.102:9333")
 	if err != nil {

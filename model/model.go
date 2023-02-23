@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"log"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/jary-287/gopass-common/common"
-	"github.com/jinzhu/gorm"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 var Db *gorm.DB
@@ -23,15 +25,21 @@ func GetDB() error {
 		mysqlInfo.Host,
 		mysqlInfo.Port,
 		mysqlInfo.Database)
-	Db, err = gorm.Open("mysql", dsn)
+	Db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+		SkipDefaultTransaction:                   true, //禁止默认事务
+		DisableForeignKeyConstraintWhenMigrating: true, //关闭创建外键约束
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true, //禁止复表
+		},
+	})
 	if err != nil {
 		return err
 	}
 	log.Println("mysql connection success")
-	// sqlDB := db.DB()
-	// // SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
-	// sqlDB.SetMaxIdleConns(10)
-	// // SetMaxOpenConns sets the maximum number of open connections to the database.
-	// sqlDB.SetMaxOpenConns(100)
+	sqlDB, _ := Db.DB()
+	// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
+	sqlDB.SetMaxIdleConns(10)
+	// SetMaxOpenConns sets the maximum number of open connections to the database.
+	sqlDB.SetMaxOpenConns(100)
 	return nil
 }

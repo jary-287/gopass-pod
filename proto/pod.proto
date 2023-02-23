@@ -32,12 +32,14 @@ message PodEnv{
     uint64 id=1;
     string env_key=2;
     string env_value=3;
+    uint64 pod_id=4;
 }
 
 message PodPort{
     uint64 id =1;
     int32 port = 2;
     string protocol =3;
+    uint64 pod_id=4;
 }
 message PodId{
     uint64 id =1;

@@ -82,7 +82,7 @@ func (ph *Podhandler) FindPodById(ctx context.Context, id *pod.PodId, info *pod.
 	return nil
 }
 
-func (ph *Podhandler) FindAllPod(ctx context.Context, findAll *pod.FinadAll, allPod *pod.AllPod) error {
+func (ph *Podhandler) FindAllPod(ctx context.Context, findAll *pod.FindAll, allPod *pod.AllPod) error {
 	pods, err := ph.PodService.FindAllPod()
 	if err != nil {
 		return errors.New("find all pod failed:" + err.Error())

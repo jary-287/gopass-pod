@@ -9,7 +9,7 @@ service Pod {
     rpc DeletePod(PodInfo) returns (response) {}
     rpc FindPodById(PodId) returns (PodInfo) {}
     rpc UpdatePod(PodInfo) returns (response){}
-    rpc FindAllPod(FinadAll)returns(AllPod) {}
+    rpc FindAllPod(FindAll)returns(AllPod) {}
 }
 
 message PodInfo {
@@ -48,7 +48,7 @@ message response {
     string msg=1;
 }
 
-message FinadAll{
+message FindAll{
 
 }
 

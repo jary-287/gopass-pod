@@ -40,7 +40,7 @@ type PodService interface {
 	DeletePod(ctx context.Context, in *PodInfo, opts ...client.CallOption) (*Response, error)
 	FindPodById(ctx context.Context, in *PodId, opts ...client.CallOption) (*PodInfo, error)
 	UpdatePod(ctx context.Context, in *PodInfo, opts ...client.CallOption) (*Response, error)
-	FindAllPod(ctx context.Context, in *FinadAll, opts ...client.CallOption) (*AllPod, error)
+	FindAllPod(ctx context.Context, in *FindAll, opts ...client.CallOption) (*AllPod, error)
 }
 
 type podService struct {
@@ -95,7 +95,7 @@ func (c *podService) UpdatePod(ctx context.Context, in *PodInfo, opts ...client.
 	return out, nil
 }
 
-func (c *podService) FindAllPod(ctx context.Context, in *FinadAll, opts ...client.CallOption) (*AllPod, error) {
+func (c *podService) FindAllPod(ctx context.Context, in *FindAll, opts ...client.CallOption) (*AllPod, error) {
 	req := c.c.NewRequest(c.name, "Pod.FindAllPod", in)
 	out := new(AllPod)
 	err := c.c.Call(ctx, req, out, opts...)
@@ -112,7 +112,7 @@ type PodHandler interface {
 	DeletePod(context.Context, *PodInfo, *Response) error
 	FindPodById(context.Context, *PodId, *PodInfo) error
 	UpdatePod(context.Context, *PodInfo, *Response) error
-	FindAllPod(context.Context, *FinadAll, *AllPod) error
+	FindAllPod(context.Context, *FindAll, *AllPod) error
 }
 
 func RegisterPodHandler(s server.Server, hdlr PodHandler, opts ...server.HandlerOption) error {
@@ -121,7 +121,7 @@ func RegisterPodHandler(s server.Server, hdlr PodHandler, opts ...server.Handler
 		DeletePod(ctx context.Context, in *PodInfo, out *Response) error
 		FindPodById(ctx context.Context, in *PodId, out *PodInfo) error
 		UpdatePod(ctx context.Context, in *PodInfo, out *Response) error
-		FindAllPod(ctx context.Context, in *FinadAll, out *AllPod) error
+		FindAllPod(ctx context.Context, in *FindAll, out *AllPod) error
 	}
 	type Pod struct {
 		pod
@@ -150,6 +150,6 @@ func (h *podHandler) UpdatePod(ctx context.Context, in *PodInfo, out *Response) 
 	return h.PodHandler.UpdatePod(ctx, in, out)
 }
 
-func (h *podHandler) FindAllPod(ctx context.Context, in *FinadAll, out *AllPod) error {
+func (h *podHandler) FindAllPod(ctx context.Context, in *FindAll, out *AllPod) error {
 	return h.PodHandler.FindAllPod(ctx, in, out)
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type PodPort struct {
-	ID       uint `gorm:"primaryKey;not null;AUTO_INCREMENT" json:"omitempty"`
+	ID       uint `gorm:"primaryKey;not null;AUTO_INCREMENT" json:"id,omitempty"`
 	PodID    uint64
 	Port     int32  `json:"port"`
 	Protocol string `json:"protocol"`
